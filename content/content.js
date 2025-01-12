@@ -1,12 +1,12 @@
 let originalCourseTimes = new Map();
 
 function injectTimezoneSelector() {
-  const coursesLi = document.querySelector("li.sidebar-item-view.courses");
-  if (coursesLi) {
-    const localTimezone = moment.tz.guess();
-    const selectorDiv = document.createElement("div");
-    selectorDiv.className = "timezone-selector";
-    selectorDiv.style.cssText = `
+    const coursesLi = document.querySelector("li.sidebar-item-view.courses");
+    if (coursesLi) {
+        const localTimezone = moment.tz.guess();
+        const selectorDiv = document.createElement("div");
+        selectorDiv.className = "timezone-selector";
+        selectorDiv.style.cssText = `
       padding: 12px 16px 16px;
       background: #343434;
       border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -14,25 +14,25 @@ function injectTimezoneSelector() {
       margin: 0 -1px;
     `;
 
-    // Create options with local time indicator
-    const timezones = {
-      "America/Los_Angeles": "SF",
-      "America/Argentina/Buenos_Aires": "BA",
-      "Asia/Seoul": "Seoul",
-      "Asia/Taipei": "Taipei",
-      "Asia/Kolkata": "Hyderabad",
-      "Europe/Berlin": "Berlin",
-      "Asia/Tokyo": "Tokyo",
-    };
+        // Create options with local time indicator
+        const timezones = {
+            "America/Los_Angeles": "SF",
+            "America/Argentina/Buenos_Aires": "BA",
+            "Asia/Seoul": "Seoul",
+            "Asia/Taipei": "Taipei",
+            "Asia/Kolkata": "Hyderabad",
+            "Europe/Berlin": "Berlin",
+            "Asia/Tokyo": "Tokyo",
+        };
 
-    const options = Object.entries(timezones)
-      .map(([tz, label]) => {
-        const isLocal = tz === localTimezone ? " (Local Time)" : "";
-        return `<option value="${tz}">${label}${isLocal}</option>`;
-      })
-      .join("");
+        const options = Object.entries(timezones)
+            .map(([tz, label]) => {
+                const isLocal = tz === localTimezone ? " (Local Time)" : "";
+                return `<option value="${tz}">${label}${isLocal}</option>`;
+            })
+            .join("");
 
-    selectorDiv.innerHTML = `
+        selectorDiv.innerHTML = `
       <label style="
         font-size: 13px;
         color: rgba(255,255,255,0.85);
@@ -85,263 +85,222 @@ function injectTimezoneSelector() {
       </div>
     `;
 
-    const section = coursesLi.querySelector("section.navigable-children");
-    if (section) {
-      section.insertBefore(selectorDiv, section.firstChild);
-    }
+        const section = coursesLi.querySelector("section.navigable-children");
+        if (section) {
+            section.insertBefore(selectorDiv, section.firstChild);
+        }
 
-    // Set initial timezone (prefer stored, fallback to local)
-    chrome.storage.sync.get("timezone", function (data) {
-      const userTimezone = document.getElementById("userTimezone");
-      userTimezone.value = data.timezone || localTimezone;
-      convertTimezones(); // Initial conversion
+        // Set initial timezone (prefer stored, fallback to local)
+        chrome.storage.sync.get("timezone", function (data) {
+            const userTimezone = document.getElementById("userTimezone");
+            userTimezone.value = data.timezone || localTimezone;
+            convertTimezones(); // Initial conversion
 
-      // Add change event listener that immediately converts
-      userTimezone.addEventListener("change", function (e) {
-        chrome.storage.sync.set({ timezone: e.target.value }, () => {
-          // Force immediate conversion after timezone change
-          setTimeout(convertTimezones, 0);
+            // Add change event listener that immediately converts
+            userTimezone.addEventListener("change", function (e) {
+                chrome.storage.sync.set({ timezone: e.target.value }, () => {
+                    // Force immediate conversion after timezone change
+                    setTimeout(convertTimezones, 0);
+                });
+            });
         });
-      });
-    });
-  }
+    }
 }
 
 function getDisplayNameForTimezone(timezone) {
-  const displayNames = {
-    "America/Los_Angeles": "SF",
-    "America/Argentina/Buenos_Aires": "BA",
-    "Asia/Seoul": "Seoul",
-    "Asia/Taipei": "Taipei",
-    "Asia/Kolkata": "Hyderabad",
-    "Europe/Berlin": "Berlin",
-    "Asia/Tokyo": "Tokyo",
-  };
-  return displayNames[timezone] || timezone.split("/").pop().replace("_", " ");
+    const displayNames = {
+        "America/Los_Angeles": "SF",
+        "America/Argentina/Buenos_Aires": "BA",
+        "Asia/Seoul": "Seoul",
+        "Asia/Taipei": "Taipei",
+        "Asia/Kolkata": "Hyderabad",
+        "Europe/Berlin": "Berlin",
+        "Asia/Tokyo": "Tokyo",
+    };
+    return displayNames[timezone] || timezone.split("/").pop().replace("_", " ");
 }
 
 function getTimezoneForCity(city) {
-  const timezones = {
-    Seoul: "Asia/Seoul",
-    BA: "America/Argentina/Buenos_Aires",
-    "Buenos Aires": "America/Argentina/Buenos_Aires",
-    SF: "America/Los_Angeles",
-    "San Francisco": "America/Los_Angeles",
-    Taipei: "Asia/Taipei",
-    Hyderabad: "Asia/Kolkata",
-    Berlin: "Europe/Berlin",
-    Tokyo: "Asia/Tokyo",
-  };
-  return timezones[city.trim()];
+    const timezones = {
+        Seoul: "Asia/Seoul",
+        BA: "America/Argentina/Buenos_Aires",
+        "Buenos Aires": "America/Argentina/Buenos_Aires",
+        SF: "America/Los_Angeles",
+        "San Francisco": "America/Los_Angeles",
+        Taipei: "Asia/Taipei",
+        Hyderabad: "Asia/Kolkata",
+        Berlin: "Europe/Berlin",
+        Tokyo: "Asia/Tokyo",
+    };
+    return timezones[city.trim()];
 }
 
 function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
-  // Parse the day and time
-  const [days, time] = timeStr.split("@");
-  const dayMap = {
-    M: "Monday",
-    T: "Tuesday",
-    W: "Wednesday",
-    Th: "Thursday",
-    F: "Friday",
-    Sa: "Saturday",
-    Su: "Sunday",
-  };
+    const [days, time] = timeStr.split('@');
+    const dayMap = {
+        'M': 'Monday',
+        'T': 'Tuesday',
+        'W': 'Wednesday',
+        'Th': 'Thursday',
+        'F': 'Friday',
+        'Sa': 'Saturday',
+        'Su': 'Sunday'
+    };
 
-  // Create a moment object for the current week
-  let date = moment().startOf("week");
+    // Handle multiple days (e.g., "MW", "TTh")
+    const daysArr = days.match(/(M|T|W|Th|F|Sa|Su)/g) || [];
+    let results = [];
 
-  // Handle multiple days (e.g., "MW", "TTh")
-  const daysArr = days.match(/(M|T|W|Th|F|Sa|Su)/g) || [];
-  let results = [];
+    daysArr.forEach(day => {
+        // Get reference date for this week's day in the source timezone
+        const sourceDayNum = moment.tz(fromTimezone).day(dayMap[day]).day();
 
-  daysArr.forEach((day) => {
-    // Map abbreviated day to full day name
-    const fullDay = dayMap[day];
+        // Create a moment object with the specific day and time in the source timezone
+        let dateTime = moment.tz(`${moment.tz(fromTimezone).day(sourceDayNum).format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD hh:mmA', fromTimezone);
 
-    // Set the day and time
-    let dateTime = moment(date).day(fullDay).format("YYYY-MM-DD ") + time;
+        // Convert to target timezone
+        let converted = dateTime.clone().tz(toTimezone);
 
-    // Convert timezone
-    let converted = moment
-      .tz(dateTime, "YYYY-MM-DD hh:mmA", fromTimezone)
-      .tz(toTimezone);
+        // Compare days to determine if we crossed date boundary
+        let sourceDayName = dateTime.format('dddd');
+        let targetDayName = converted.format('dddd');
 
-    // Get the converted day abbreviation
-    let convertedDay = converted.format("dd").substring(0, day.length);
+        // Get proper day abbreviation
+        let convertedDay;
+        if (sourceDayName !== targetDayName) {
+            // If source day is later in week than target day, we went backwards
+            const sourceDay = dateTime.day();
+            const targetDay = converted.day();
+            convertedDay = Object.keys(dayMap).find(d => dayMap[d] === targetDayName);
+        } else {
+            convertedDay = day;
+        }
 
-    results.push(convertedDay);
-  });
+        results.push(convertedDay);
+    });
 
-  // Join multiple days and add the converted time
-  return (
-    results.join("") +
-    "@" +
-    moment
-      .tz(date.format("YYYY-MM-DD ") + time, "YYYY-MM-DD hh:mmA", fromTimezone)
-      .tz(toTimezone)
-      .format("h:mmA")
-  );
+    // Convert the time portion to the target timezone
+    const convertedTime = moment.tz(`${moment.tz(fromTimezone).format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD hh:mmA', fromTimezone)
+        .tz(toTimezone)
+        .format('h:mmA');
+
+    return results.join('') + '@' + convertedTime;
 }
 
 function convertTimezones() {
-  const listItems = document.querySelectorAll(
-    ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
-  );
-  const userTimezone = document.getElementById("userTimezone");
-
-  if (!userTimezone) return;
-
-  listItems.forEach((item) => {
-    const text = item.textContent;
-    const match = text.match(
-      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
+    const listItems = document.querySelectorAll(
+        ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
     );
+    const userTimezoneSelect = document.getElementById("userTimezone");
 
-    if (match) {
-      const courseInfo = match[1];
-      const originalData = originalCourseTimes.get(courseInfo);
+    if (!userTimezoneSelect) return;
 
-      if (originalData) {
-        try {
-          const sourceTimezone = originalData.timezone;
-          const sourceTime = moment.tz(
-            originalData.time,
-            "h:mmA",
-            sourceTimezone
-          );
-          const targetTime = sourceTime.clone().tz(userTimezone.value);
+    const userTimezone = userTimezoneSelect.value;
 
-          // Check if the day changes due to timezone difference
-          const sourceDayOfWeek = sourceTime.day();
-          const targetDayOfWeek = targetTime.day();
+    listItems.forEach((item) => {
+        const text = item.textContent;
+        const match = text.match(
+            /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
+        );
 
-          // Convert days if needed
-          let convertedDays = convertDays(
-            originalData.days,
-            sourceDayOfWeek !== targetDayOfWeek,
-            targetTime.isBefore(sourceTime)
-          );
+        if (match) {
+            const courseInfo = match[1];
+            const originalData = originalCourseTimes.get(courseInfo);
 
-          const localTime = targetTime.format("h:mmA");
-          const displayName = getDisplayNameForTimezone(userTimezone.value);
+            if (originalData) {
+                try {
+                    const sourceTimezone = originalData.timezone;
+                    const convertedTimeStr = convertTimeToTargetTimezone(`${originalData.days}@${originalData.time}`, sourceTimezone, userTimezone);
+                    const displayName = getDisplayNameForTimezone(userTimezone);
 
-          // Update the displayed text
-          item.textContent = `${courseInfo}, ${convertedDays}@${localTime} ${displayName}`;
+                    // Update the displayed text
+                    item.textContent = `${courseInfo}, ${convertedTimeStr} ${displayName}`;
 
-          // Enhanced tooltip
-          item.parentElement.title = `Original: ${courseInfo}, ${originalData.days}@${originalData.time} ${originalData.city}
+                    // Enhanced tooltip
+                    item.parentElement.title = `Original: ${courseInfo}, ${originalData.days}@${originalData.time} ${originalData.city}
 Converting from: ${originalData.city} (${sourceTimezone})
-Converted to: ${displayName} (${userTimezone.value})
+Converted to: ${displayName} (${userTimezone})
 Note: Class days may shift due to timezone differences`;
-        } catch (e) {
-          console.error("Time conversion error:", e);
+                } catch (e) {
+                    console.error("Time conversion error:", e);
+                }
+            }
         }
-      }
-    }
-  });
-}
-
-function convertDays(days, shouldShift, isEarlier) {
-  if (!shouldShift) return days;
-
-  const dayMap = {
-    M: "Monday",
-    T: "Tuesday",
-    W: "Wednesday",
-    Th: "Thursday",
-    F: "Friday",
-    Sa: "Saturday",
-    Su: "Sunday",
-  };
-
-  // Split the days string into individual days
-  const daysList = days.split(/(?=[A-Z])/).filter((d) => d);
-
-  // Shift days based on timezone difference
-  return daysList
-    .map((day) => {
-      let idx = Object.keys(dayMap).indexOf(day);
-      if (idx === -1) return day;
-
-      // Adjust index based on whether the time shifts forward or backward
-      idx = (idx + (isEarlier ? -1 : 1) + 7) % 7;
-      return Object.keys(dayMap)[idx];
-    })
-    .join("");
+    });
 }
 
 // Add observer to handle dynamic content loading
 function initializeObserver() {
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.addedNodes.length) {
-        const coursesElement = document.querySelector(
-          "li.sidebar-item-view.courses"
-        );
-        if (coursesElement && !document.querySelector(".timezone-selector")) {
-          observer.disconnect();
-          setTimeout(() => {
-            storeOriginalTimes();
-            injectTimezoneSelector();
-            convertTimezones();
-          }, 1000);
-          break;
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length) {
+                const coursesElement = document.querySelector(
+                    "li.sidebar-item-view.courses"
+                );
+                if (coursesElement && !document.querySelector(".timezone-selector")) {
+                    observer.disconnect();
+                    setTimeout(() => {
+                        storeOriginalTimes();
+                        injectTimezoneSelector();
+                        convertTimezones();
+                    }, 1000);
+                    break;
+                }
+            }
         }
-      }
-    }
-  });
+    });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
 }
 
 // Replace DOMContentLoaded with initialization function
 function initialize() {
-  const coursesElement = document.querySelector("li.sidebar-item-view.courses");
-  if (coursesElement) {
-    // Add delay to ensure dynamic content is loaded
-    setTimeout(() => {
-      // Store original times before any conversion
-      storeOriginalTimes();
-      injectTimezoneSelector();
-      convertTimezones();
-    }, 1000); // 1 second delay
-  } else {
-    initializeObserver();
-  }
+    const coursesElement = document.querySelector("li.sidebar-item-view.courses");
+    if (coursesElement) {
+        // Add delay to ensure dynamic content is loaded
+        setTimeout(() => {
+            // Store original times before any conversion
+            storeOriginalTimes();
+            injectTimezoneSelector();
+            convertTimezones();
+        }, 1000); // 1 second delay
+    } else {
+        initializeObserver();
+    }
 }
 
 // Add new function to store original times
 function storeOriginalTimes() {
-  const listItems = document.querySelectorAll(
-    ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
-  );
-
-  listItems.forEach((item) => {
-    const text = item.textContent;
-    const match = text.match(
-      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
+    const listItems = document.querySelectorAll(
+        ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
     );
 
-    if (match) {
-      const courseInfo = match[1];
-      const days = match[2];
-      const time = match[3];
-      const ampm = match[4];
-      const city = match[5];
+    originalCourseTimes.clear(); // Clear existing stored times
 
-      // Store original time info using course name as key
-      originalCourseTimes.set(courseInfo, {
-        days: days,
-        time: `${time}${ampm}`,
-        city: city,
-        timezone: getTimezoneForCity(city),
-      });
-    }
-  });
+    listItems.forEach((item) => {
+        const text = item.textContent.trim();
+        const match = text.match(
+            /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
+        );
+
+        if (match) {
+            const courseInfo = match[1].trim();
+            const days = match[2].trim();
+            const time = `${match[3]}${match[4]}`;
+            const city = match[5].trim();
+
+            // Store original time info using course name as key
+            originalCourseTimes.set(courseInfo, {
+                days: days,
+                time: time,
+                city: city,
+                timezone: getTimezoneForCity(city)
+            });
+        }
+    });
 }
 
 // Run initialization
@@ -349,7 +308,7 @@ initialize();
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "updateTimezone") {
-    convertTimezones();
-  }
+    if (request.action === "updateTimezone") {
+        convertTimezones();
+    }
 });
