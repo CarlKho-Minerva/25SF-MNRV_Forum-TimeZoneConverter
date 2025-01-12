@@ -4,6 +4,8 @@ A Chrome extension that automatically converts class times on [forum.minerva.edu
 
 ![alt text](demo.gif)
 
+<img width="317" alt="image" src="https://github.com/user-attachments/assets/0d4a590f-7f01-457e-b9ce-8a9020e9a2a1" />
+
 ## Features
 
 - Converts class times between major Minerva hubs:
