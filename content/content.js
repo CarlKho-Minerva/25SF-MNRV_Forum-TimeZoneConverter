@@ -4,8 +4,13 @@ function injectTimezoneSelector() {
     const localTimezone = moment.tz.guess();
     const selectorDiv = document.createElement("div");
     selectorDiv.className = "timezone-selector";
-    selectorDiv.style.cssText =
-      'padding: 8px 16px; background: #fafafa; border-bottom: 1px solid #eaeaea; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;';
+    selectorDiv.style.cssText = `
+      padding: 12px 16px 16px;
+      background: #343434;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0 -1px;
+    `;
 
     // Create options with local time indicator
     const timezones = {
@@ -26,10 +31,56 @@ function injectTimezoneSelector() {
       .join("");
 
     selectorDiv.innerHTML = `
-      <label style="font-size: 12px; color: #666; display: block; margin-bottom: 4px; font-weight: 500;">Timezone Display:</label>
-      <select id="userTimezone" style="width: 100%; padding: 6px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 12px; color: #333; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+      <label style="
+        font-size: 13px;
+        color: rgba(255,255,255,0.85);
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      ">
+        <svg style="
+          width: 15px;
+          height: 15px;
+          vertical-align: -2px;
+          margin-right: 6px;
+          fill: currentColor;
+          opacity: 0.9
+        " viewBox="0 0 24 24">
+          <path d="M12,0C18.6,0 24,5.4 24,12C24,18.6 18.6,24 12,24C5.4,24 0,18.6 0,12C0,5.4 5.4,0 12,0M12,2C6.5,2 2,6.5 2,12C2,17.5 6.5,22 12,22C17.5,22 22,17.5 22,12C22,6.5 17.5,2 12,2M12.5,7V12.3L17,14.9L16.3,16.2L11,13V7H12.5Z"></path>
+        </svg>
+        Timezone Display
+      </label>
+      <select id="userTimezone" style="
+        width: 100%;
+        padding: 8px 28px 8px 10px;
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 4px;
+        font-size: 13px;
+        line-height: 1.3;
+        color: rgba(255,255,255,0.95);
+        background: #2a2a2a;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        appearance: none;
+        position: relative;
+        font-family: inherit;
+        letter-spacing: 0.01em;
+      ">
         ${options}
       </select>
+      <div style="position: relative;">
+        <svg style="
+          position: absolute;
+          right: 10px;
+          top: -26px;
+          width: 14px;
+          height: 14px;
+          fill: rgba(255,255,255,0.7);
+          pointer-events: none
+        " viewBox="0 0 24 24">
+          <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path>
+        </svg>
+      </div>
     `;
 
     const section = coursesLi.querySelector("section.navigable-children");

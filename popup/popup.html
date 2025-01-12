@@ -5,60 +5,117 @@
   <title>Timezone Converter</title>
   <style>
     body {
-      width: 200px;
-      padding: 10px;
+      width: 220px;
+      padding: 14px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #fafafa;
+      background: #343434;
+      color: rgba(255,255,255,0.95);
+      letter-spacing: 0.01em;
+      margin: 0;
     }
 
     h3 {
-      color: #333;
+      color: rgba(255,255,255,0.95);
       font-size: 14px;
-      margin-bottom: 12px;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    h3 svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
     }
 
     select {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #e0e0e0;
+      padding: 8px 28px 8px 10px;
+      border: 1px solid rgba(255,255,255,0.25);
       border-radius: 4px;
       font-size: 13px;
-      color: #333;
-      background: white;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      line-height: 1.3;
+      color: rgba(255,255,255,0.95);
+      background: #2a2a2a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      appearance: none;
+      font-family: inherit;
+      letter-spacing: 0.01em;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper svg {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      fill: rgba(255,255,255,0.5);
+      pointer-events: none;
     }
 
     button {
       width: 100%;
       padding: 8px;
       margin-top: 8px;
-      background: #2196F3;
+      background: #1976D2;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     button:hover {
-      background: #1976D2;
+      background: #1565C0;
+    }
+
+    button svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
     }
   </style>
 </head>
 
 <body>
-  <h3>Display Times In:</h3>
-  <select id="timezoneSelect">
-    <option value="America/Los_Angeles">SF</option>
-    <option value="America/Argentina/Buenos_Aires">BA</option>
-    <option value="Asia/Seoul">Seoul</option>
-    <option value="Asia/Taipei">Taipei</option>
-    <option value="Asia/Kolkata">Hyderabad</option>
-    <option value="Europe/Berlin">Berlin</option>
-    <option value="Asia/Tokyo">Tokyo</option>
-  </select>
-  <button id="updateButton">Update</button>
+  <h3>
+    <svg viewBox="0 0 24 24">
+      <path d="M12,0C18.6,0 24,5.4 24,12C24,18.6 18.6,24 12,24C5.4,24 0,18.6 0,12C0,5.4 5.4,0 12,0M12,2C6.5,2 2,6.5 2,12C2,17.5 6.5,22 12,22C17.5,22 22,17.5 22,12C22,6.5 17.5,2 12,2M12.5,7V12.3L17,14.9L16.3,16.2L11,13V7H12.5Z"></path>
+    </svg>
+    Display Times In:
+  </h3>
+  <div class="select-wrapper">
+    <select id="timezoneSelect">
+      <option value="America/Los_Angeles">SF</option>
+      <option value="America/Argentina/Buenos_Aires">BA</option>
+      <option value="Asia/Seoul">Seoul</option>
+      <option value="Asia/Taipei">Taipei</option>
+      <option value="Asia/Kolkata">Hyderabad</option>
+      <option value="Europe/Berlin">Berlin</option>
+      <option value="Asia/Tokyo">Tokyo</option>
+    </select>
+    <svg viewBox="0 0 24 24">
+      <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path>
+    </svg>
+  </div>
+  <button id="updateButton">
+    <svg viewBox="0 0 24 24">
+      <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"></path>
+    </svg>
+    Update
+  </button>
   <script src="popup.js"></script>
 </body>
 
