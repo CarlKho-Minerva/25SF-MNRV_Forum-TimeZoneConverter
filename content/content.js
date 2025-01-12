@@ -139,48 +139,92 @@ function convertTimezones() {
   );
   const userTimezone = document.getElementById("userTimezone");
 
-  if (!userTimezone) return; // Guard against missing element
+  if (!userTimezone) return;
 
   listItems.forEach((item) => {
     const text = item.textContent;
-    // Updated regex to handle course codes and names
-    const match = text.match(/^(.+?)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/);
+    // Updated regex to handle days (like MW, TTh, WF)
+    const match = text.match(
+      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
+    );
 
     if (match) {
       const courseInfo = match[1];
-      const time = match[2];
-      const ampm = match[3];
-      const city = match[4];
+      const days = match[2];
+      const time = match[3];
+      const ampm = match[4];
+      const city = match[5];
       const sourceTimezone = getTimezoneForCity(city);
 
       if (sourceTimezone) {
         try {
-          // Create a moment object in the source timezone
           const sourceTime = moment.tz(
             `${time} ${ampm}`,
             "h:mm A",
             sourceTimezone
           );
-
-          // Convert to the target timezone
           const targetTime = sourceTime.clone().tz(userTimezone.value);
 
-          // Format the time
+          // Check if the day changes due to timezone difference
+          const sourceDayOfWeek = sourceTime.day();
+          const targetDayOfWeek = targetTime.day();
+
+          // Convert days if needed
+          let convertedDays = convertDays(
+            days,
+            sourceDayOfWeek !== targetDayOfWeek,
+            targetTime.isBefore(sourceTime)
+          );
+
           const localTime = targetTime.format("h:mmA");
           const displayName = getDisplayNameForTimezone(userTimezone.value);
 
-          // Update the text
-          item.textContent = `${courseInfo}@${localTime} ${displayName}`;
+          // Store original text for hover
+          const originalText = `${courseInfo}, ${days}@${time}${ampm} ${city}`;
 
-          // Add title attribute for full timezone info
-          item.parentElement.title = `Original: ${time} ${ampm} ${city} (${sourceTimezone})
-Converted: ${localTime} (${userTimezone.value})`;
+          // Update the displayed text
+          item.textContent = `${courseInfo}, ${convertedDays}@${localTime} ${displayName}`;
+
+          // Enhanced tooltip with more details
+          item.parentElement.title = `Original: ${originalText}
+Converting from: ${city} (${sourceTimezone})
+Converted to: ${displayName} (${userTimezone.value})
+Note: Class days may shift due to timezone differences`;
         } catch (e) {
           console.error("Time conversion error:", e);
         }
       }
     }
   });
+}
+
+function convertDays(days, shouldShift, isEarlier) {
+  if (!shouldShift) return days;
+
+  const dayMap = {
+    M: "Monday",
+    T: "Tuesday",
+    W: "Wednesday",
+    Th: "Thursday",
+    F: "Friday",
+    Sa: "Saturday",
+    Su: "Sunday",
+  };
+
+  // Split the days string into individual days
+  const daysList = days.split(/(?=[A-Z])/).filter((d) => d);
+
+  // Shift days based on timezone difference
+  return daysList
+    .map((day) => {
+      let idx = Object.keys(dayMap).indexOf(day);
+      if (idx === -1) return day;
+
+      // Adjust index based on whether the time shifts forward or backward
+      idx = (idx + (isEarlier ? -1 : 1) + 7) % 7;
+      return Object.keys(dayMap)[idx];
+    })
+    .join("");
 }
 
 // Add observer to handle dynamic content loading
