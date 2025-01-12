@@ -5,15 +5,17 @@
   "description": "Converts course schedule times to your local timezone.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup/popup.html"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content/lib/moment.js", "content/lib/moment-timezone-with-data.js", "content/content.js"]
+      "matches": ["*://forum.minerva.edu/*"],
+      "js": ["content/lib/moment.js", "content/lib/moment-timezone-with-data.js", "content/content.js"],
+      "run_at": "document_end"
     }
   ],
   "background": {

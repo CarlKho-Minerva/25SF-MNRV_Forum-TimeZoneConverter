@@ -1,19 +1,65 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Timezone Converter</title>
   <style>
-    body { width: 200px; }
+    body {
+      width: 200px;
+      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #fafafa;
+    }
+
+    h3 {
+      color: #333;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #333;
+      background: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: #1976D2;
+    }
   </style>
 </head>
+
 <body>
-  <h3>Select Timezone:</h3>
+  <h3>Display Times In:</h3>
   <select id="timezoneSelect">
-    <option value="local">Local Time</option>
-    <option value="America/New_York">New York</option>
-    <option value="America/Los_Angeles">Los Angeles</option>
+    <option value="America/Los_Angeles">SF</option>
+    <option value="America/Argentina/Buenos_Aires">BA</option>
+    <option value="Asia/Seoul">Seoul</option>
+    <option value="Asia/Taipei">Taipei</option>
+    <option value="Asia/Kolkata">Hyderabad</option>
+    <option value="Europe/Berlin">Berlin</option>
+    <option value="Asia/Tokyo">Tokyo</option>
   </select>
   <button id="updateButton">Update</button>
   <script src="popup.js"></script>
 </body>
+
 </html>
