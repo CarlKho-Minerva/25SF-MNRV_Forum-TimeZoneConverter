@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timezone Converter Test</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.5;
+        }
+        .test-case {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .success { color: #2a9d8f; }
+        .error { color: #e63946; }
+    </style>
+</head>
+<body>
+    <h1>Timezone Converter Test</h1>
+
+    <div class="test-case">
+        <h3>Test Input</h3>
+        <select id="fromTz">
+            <option value="America/Argentina/Buenos_Aires">Buenos Aires</option>
+            <option value="Asia/Seoul">Seoul</option>
+        </select>
+        <input type="text" id="inputTime" value="W@12:00PM" placeholder="e.g., W@12:00PM">
+        <select id="toTz">
+            <option value="America/Los_Angeles">San Francisco</option>
+            <option value="Asia/Seoul">Seoul</option>
+        </select>
+        <button onclick="runTest()">Convert</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <div id="autoTests" class="test-case">
+        <h3>Automated Tests</h3>
+        <button onclick="runAutoTests()">Run All Tests</button>
+        <div id="autoTestResults"></div>
+    </div>
+
+    <script src="../content/lib/moment.js"></script>
+    <script src="../content/lib/moment-timezone-with-data.js"></script>
+    <script>
+        function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
+            // Parse the day and time
+            const [days, time] = timeStr.split('@');
+            const dayMap = {
+                'M': 'Monday',
+                'T': 'Tuesday',
+                'W': 'Wednesday',
+                'Th': 'Thursday',
+                'F': 'Friday',
+                'Sa': 'Saturday',
+                'Su': 'Sunday'
+            };
+
+            // Create a moment object for the current week
+            let date = moment().startOf('week');
+
+            // Handle multiple days (e.g., "MW", "TTh")
+            const daysArr = days.match(/(M|T|W|Th|F|Sa|Su)/g) || [];
+            let results = [];
+
+            daysArr.forEach(day => {
+                // Map abbreviated day to full day name
+                const fullDay = dayMap[day];
+
+                // Set the day and time
+                let dateTime = moment(date)
+                    .day(fullDay)
+                    .format('YYYY-MM-DD ') + time;
+
+                // Convert timezone
+                let converted = moment.tz(dateTime, 'YYYY-MM-DD hh:mmA', fromTimezone)
+                    .tz(toTimezone);
+
+                // Get the converted day abbreviation
+                let convertedDay = converted.format('dd').substring(0, day.length);
+
+                results.push(convertedDay);
+            });
+
+            // Join multiple days and add the converted time
+            return results.join('') + '@' + moment.tz(date.format('YYYY-MM-DD ') + time, 'YYYY-MM-DD hh:mmA', fromTimezone)
+                .tz(toTimezone)
+                .format('h:mmA');
+        }
+
+        function runTest() {
+            const fromTz = document.getElementById('fromTz').value;
+            const toTz = document.getElementById('toTz').value;
+            const inputTime = document.getElementById('inputTime').value;
+
+            try {
+                const result = convertTimeToTargetTimezone(inputTime, fromTz, toTz);
+                document.getElementById('result').innerHTML = `
+                    <strong>Input:</strong> ${inputTime} (${fromTz})<br>
+                    <strong>Output:</strong> ${result} (${toTz})
+                `;
+            } catch (e) {
+                document.getElementById('result').innerHTML = `<span class="error">Error: ${e.message}</span>`;
+            }
+        }
+
+        function runAutoTests() {
+            const tests = [
+                {
+                    input: "W@12:00PM",
+                    from: "America/Argentina/Buenos_Aires",
+                    to: "America/Los_Angeles",
+                    expectedPattern: /^W@\d{1,2}:\d{2}(AM|PM)$/
+                },
+                {
+                    input: "TTh@08:00PM",
+                    from: "America/Argentina/Buenos_Aires",
+                    to: "America/Los_Angeles",
+                    expectedPattern: /^TTh@\d{1,2}:\d{2}(AM|PM)$/
+                },
+                {
+                    input: "MW@09:00AM",
+                    from: "America/Argentina/Buenos_Aires",
+                    to: "Asia/Seoul",
+                    expectedPattern: /^MW@\d{1,2}:\d{2}(AM|PM)$/
+                }
+            ];
+
+            const results = tests.map((test, index) => {
+                try {
+                    const result = convertTimeToTargetTimezone(test.input, test.from, test.to);
+                    const passed = test.expectedPattern.test(result);
+                    return `
+                        <div class="${passed ? 'success' : 'error'}">
+                            Test ${index + 1}: ${passed ? 'PASSED' : 'FAILED'}<br>
+                            Input: ${test.input} (${test.from})<br>
+                            Output: ${result} (${test.to})
+                        </div>
+                    `;
+                } catch (e) {
+                    return `
+                        <div class="error">
+                            Test ${index + 1}: FAILED<br>
+                            Error: ${e.message}
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('autoTestResults').innerHTML = results.join('<hr>');
+        }
+    </script>
+</body>
+</html>
