@@ -136,60 +136,58 @@ function getTimezoneForCity(city) {
 }
 
 function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
-    const [days, time] = timeStr.split('@');
-    const dayMap = {
-        'M': 'Monday',
-        'T': 'Tuesday',
-        'W': 'Wednesday',
-        'Th': 'Thursday',
-        'F': 'Friday',
-        'Sa': 'Saturday',
-        'Su': 'Sunday'
-    };
+  const [days, time] = timeStr.split("@");
+  const dayMap = {
+    M: "Monday",
+    T: "Tuesday",
+    W: "Wednesday",
+    Th: "Thursday",
+    F: "Friday",
+    Sa: "Saturday",
+    Su: "Sunday",
+  };
 
-    // Handle multiple days (e.g., "MW", "TTh")
-    const daysArr = days.match(/(M|T|W|Th|F|Sa|Su)/g) || [];
-    let results = [];
+  // Use regex with lookbehind to correctly match "Th" as a single token
+  const daysArr = days.match(/(?:M|T(?!h)|Th|W|F|Sa|Su)/g) || [];
+  let results = [];
 
-    daysArr.forEach(day => {
-        // Create base date for day conversion
-        const baseDate = moment().startOf('week');
-        const dayNum = Object.keys(dayMap).indexOf(day);
+  daysArr.forEach((day) => {
+    const baseDate = moment().startOf("week");
+    const dayFullName = dayMap[day];
 
-        // Set time on the current day
-        let dateTime = moment.tz(
-            baseDate.format('YYYY-MM-DD ') + time,
-            'YYYY-MM-DD hh:mmA',
-            fromTimezone
-        ).day(dayMap[day]);
-
-        // Convert to target timezone
-        let converted = dateTime.clone().tz(toTimezone);
-
-        // Get the actual day in target timezone
-        let targetDay = converted.format('dddd');
-
-        // Map back to abbreviation
-        let convertedDay = Object.keys(dayMap).find(d =>
-            dayMap[d] === targetDay
-        );
-
-        // Special handling for "Th" to avoid it becoming "T"
-        if (targetDay === "Thursday") {
-            convertedDay = "Th";
-        }
-
-        results.push(convertedDay);
-    });
-
-    // Convert time separately to avoid day boundary issues
-    const convertedTime = moment.tz(
-        moment().format('YYYY-MM-DD ') + time,
-        'YYYY-MM-DD hh:mmA',
+    // Set time on the current day
+    let dateTime = moment
+      .tz(
+        baseDate.format("YYYY-MM-DD ") + time,
+        "YYYY-MM-DD hh:mmA",
         fromTimezone
-    ).tz(toTimezone).format('h:mmA');
+      )
+      .day(dayFullName);
 
-    return results.join('') + '@' + convertedTime;
+    // Convert to target timezone
+    let converted = dateTime.clone().tz(toTimezone);
+
+    // Get the actual day in target timezone
+    let targetDay = converted.format("dddd");
+
+    // Find the abbreviation by matching the full day name
+    let convertedDay = Object.entries(dayMap).find(
+      ([abbr, full]) => full === targetDay
+    )[0];
+
+    results.push(convertedDay);
+  });
+
+  const convertedTime = moment
+    .tz(
+      moment().format("YYYY-MM-DD ") + time,
+      "YYYY-MM-DD hh:mmA",
+      fromTimezone
+    )
+    .tz(toTimezone)
+    .format("h:mmA");
+
+  return results.join("") + "@" + convertedTime;
 }
 
 function convertTimezones() {
@@ -215,7 +213,11 @@ function convertTimezones() {
       if (originalData) {
         try {
           const sourceTimezone = originalData.timezone;
-          const convertedTimeStr = convertTimeToTargetTimezone(`${originalData.days}@${originalData.time}`, sourceTimezone, userTimezone);
+          const convertedTimeStr = convertTimeToTargetTimezone(
+            `${originalData.days}@${originalData.time}`,
+            sourceTimezone,
+            userTimezone
+          );
           const displayName = getDisplayNameForTimezone(userTimezone);
 
           // Update the displayed text
@@ -279,33 +281,33 @@ function initialize() {
 
 // Add new function to store original times
 function storeOriginalTimes() {
-    const listItems = document.querySelectorAll(
-        ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
+  const listItems = document.querySelectorAll(
+    ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
+  );
+
+  originalCourseTimes.clear(); // Clear existing stored times
+
+  listItems.forEach((item) => {
+    const text = item.textContent.trim();
+    const match = text.match(
+      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
     );
 
-    originalCourseTimes.clear(); // Clear existing stored times
+    if (match) {
+      const courseInfo = match[1].trim();
+      const days = match[2].trim();
+      const time = `${match[3]}${match[4]}`;
+      const city = match[5].trim();
 
-    listItems.forEach((item) => {
-        const text = item.textContent.trim();
-        const match = text.match(
-            /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+([A-Za-z\s]+)$/
-        );
-
-        if (match) {
-            const courseInfo = match[1].trim();
-            const days = match[2].trim();
-            const time = `${match[3]}${match[4]}`;
-            const city = match[5].trim();
-
-            // Store original time info using course name as key
-            originalCourseTimes.set(courseInfo, {
-                days: days,
-                time: time,
-                city: city,
-                timezone: getTimezoneForCity(city)
-            });
-        }
-    });
+      // Store original time info using course name as key
+      originalCourseTimes.set(courseInfo, {
+        days: days,
+        time: time,
+        city: city,
+        timezone: getTimezoneForCity(city),
+      });
+    }
+  });
 }
 
 // Run initialization
