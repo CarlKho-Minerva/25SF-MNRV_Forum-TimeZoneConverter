@@ -21,42 +21,31 @@ A Chrome extension that automatically converts class times on [forum.minerva.edu
 - Remembers your timezone preference
 - Shows original time on hover
 
-## Installation
+## Download Instructions
 
-### Step-by-step Instructions for beginners
+1. Go to the [Releases page](https://github.com/CarlKho-Minerva/25SF-MNRV_Forum-TimeZoneConverter/releases/tag/v1.1.0)
+2. Find the latest version (v1.1.0)
+3. Click on `25SF-MNRV_Forum-TimeZoneConverter-v1.1.0.zip`
+4. The file will download to your Downloads folder
 
-1. Getting the files:
-   - Click the green "Code" button above
-   - Select "Download ZIP"
-   - Find the downloaded ZIP file in your Downloads folder
-   - Right-click the ZIP file and select "Extract All" (Windows) or double-click (Mac)
-   - Choose where to extract the files (remember this location!)
+## Installation Steps
 
-2. Opening Chrome Extensions page:
-   - Open Google Chrome browser
+1. Find the downloaded ZIP file
+   - Open your Downloads folder
+   - Look for `25SF-MNRV_Forum-TimeZoneConverter-v1.1.0.zip`
+
+2. Extract the ZIP file
+   - Double-click the ZIP file
+   - A new folder will appear
+
+3. Install in Chrome
+   - Open Chrome browser
    - Type `chrome://extensions` in the address bar
-   - Press Enter
-
-3. Enabling Developer Mode:
-   - Look for the "Developer mode" toggle in the top right corner
-   - Click to turn it ON (the toggle should slide to the right)
-   - You should see new buttons appear at the top: "Load unpacked", "Pack extension", etc.
-
-4. Loading the extension:
-   - Click the "Load unpacked" button
-   - Navigate to the folder where you extracted the files
-   - Select the main folder (it should contain manifest.json)
-   - Click "Select Folder" (Windows) or "Open" (Mac)
-
-5. Verifying installation:
-   - You should see "Timezone Converter" appear in your extensions list
-   - A new extension icon should appear in your Chrome toolbar
-   - If you don't see the icon, click the puzzle piece icon to find it
-
-6. Testing the extension:
-   - Go to forum.minerva.edu and log in
-   - Look for the timezone selector below the "Courses" section
-   - Try selecting different timezones to see the times update
+   - Look for "Developer Mode" switch in top-right corner
+   - Turn it ON
+   - Click "Load unpacked" button
+   - Find and select the extracted folder
+   - Click "Open"
 
 If something goes wrong:
 
