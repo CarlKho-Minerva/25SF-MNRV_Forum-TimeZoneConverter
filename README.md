@@ -2,9 +2,7 @@
 
 A Chrome extension that automatically converts class times on [forum.minerva.edu](https://forum.minerva.edu) to your preferred timezone.
 
-![alt text](demo.gif)
-
-<img width="317" alt="image" src="https://github.com/user-attachments/assets/0d4a590f-7f01-457e-b9ce-8a9020e9a2a1" />
+![alt text](demo1-1-0.gif)
 
 ## Features
 
