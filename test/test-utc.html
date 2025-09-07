@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone Converter Test - UTC Format</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        li.sidebar-item-view.courses {
+            list-style: none;
+        }
+        section.navigable-children {
+            padding: 10px;
+        }
+        .sidebar-sub-items-list {
+            margin: 10px 0;
+        }
+        .sidebar-sub-item-view {
+            margin: 5px 0;
+        }
+        .navigation-link {
+            display: block;
+            padding: 8px;
+            background-color: #3a3a3a;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            margin: 2px 0;
+        }
+        .link-text {
+            display: block;
+        }
+        .test-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #0066cc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>Timezone Converter Test Page - Mixed Format Support</h2>
+        <p>This page simulates the Minerva forum structure with both old city format and new UTC format for testing the updated extension.</p>
+        <p><strong>Expected behavior:</strong></p>
+        <ul>
+            <li>Timezone selector should appear at the top of the courses section</li>
+            <li>Times should be converted from their source timezone (Taipei/UTC) to your selected timezone</li>
+            <li>Both old format (TT@11:00AM Taipei) and new format (MW@11PM UTC) should work</li>
+            <li>Hovering over course times should show conversion details</li>
+        </ul>
+    </div>
+
+    <div class="sidebar">
+        <li class="sidebar-item-view courses">
+            <section class="navigable-children">
+                <div class="sidebar-sub-items-list">
+                    <!-- Old format with city names (current Minerva format) -->
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">AH111 - Wisor, TT@11:00AM Taipei</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">CP193.025 - Watson, R@1PM UTC</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">CS156 - Watson, MW@11PM UTC</span>
+                        </a>
+                    </div>
+                    <!-- New UTC format (future Minerva format) -->
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">Physics Fundamentals, MWF@9:00AM UTC</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">Advanced Mathematics, TThF@1:00PM UTC</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-sub-item-view">
+                        <a href="#" class="navigation-link">
+                            <span class="link-text">Literature Analysis, MW@11:30AM UTC</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </li>
+    </div>
+
+    <script src="../content/lib/moment.js"></script>
+    <script src="../content/lib/moment-timezone-with-data.js"></script>
+    <script>
+        // Mock Chrome extension APIs for testing
+        if (!window.chrome) {
+            window.chrome = {
+                storage: {
+                    sync: {
+                        get: function(key, callback) {
+                            // Default to user's detected timezone
+                            const userTimezone = moment.tz.guess();
+                            callback({ timezone: userTimezone });
+                        },
+                        set: function(data, callback) {
+                            console.log('Storage set:', data);
+                            if (callback) callback();
+                        }
+                    }
+                },
+                runtime: {
+                    onMessage: {
+                        addListener: function(callback) {
+                            console.log('Message listener added');
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+    <script src="../content/content.js"></script>
+</body>
+</html>

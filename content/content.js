@@ -120,6 +120,22 @@ function getDisplayNameForTimezone(timezone) {
   return displayNames[timezone] || timezone.split("/").pop().replace("_", " ");
 }
 
+function getTimezoneForCity(cityName) {
+  const cityMap = {
+    "SF": "America/Los_Angeles",
+    "San Francisco": "America/Los_Angeles",
+    "BA": "America/Argentina/Buenos_Aires",
+    "Buenos Aires": "America/Argentina/Buenos_Aires",
+    "Seoul": "Asia/Seoul",
+    "Taipei": "Asia/Taipei",
+    "Hyderabad": "Asia/Kolkata",
+    "Berlin": "Europe/Berlin",
+    "Tokyo": "Asia/Tokyo",
+    "UTC": "UTC"
+  };
+  return cityMap[cityName] || "UTC"; // Default to UTC if city not found
+}
+
 
 function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
   const [days, time] = timeStr.split("@");
@@ -177,33 +193,43 @@ function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
 }
 
 function convertTimezones() {
+  console.log("Starting timezone conversion..."); // Debug log
   const listItems = document.querySelectorAll(
     ".sidebar-sub-items-list .sidebar-sub-item-view .navigation-link .link-text"
   );
   const userTimezoneSelect = document.getElementById("userTimezone");
 
-  if (!userTimezoneSelect) return;
+  if (!userTimezoneSelect) {
+    console.log("No timezone selector found"); // Debug log
+    return;
+  }
 
   const userTimezone = userTimezoneSelect.value;
+  console.log("Converting to timezone:", userTimezone); // Debug log
 
   listItems.forEach((item) => {
     const text = item.textContent;
     // Use the stored original data to prevent re-parsing potentially modified text
     const courseInfoMatch = text.match(/^(.+?),/);
     if (!courseInfoMatch) return;
-    
+
     const courseInfo = courseInfoMatch[1].trim();
     const originalData = originalCourseTimes.get(courseInfo);
+    console.log("Processing course:", courseInfo, "Original data:", originalData); // Debug log
 
     if (originalData) {
       try {
-        const sourceTimezone = originalData.timezone; // This will now be "UTC"
+        const sourceTimezone = originalData.timezone;
+        console.log("Converting from", sourceTimezone, "to", userTimezone); // Debug log
+
         const convertedTimeStr = convertTimeToTargetTimezone(
           `${originalData.days}@${originalData.time}`,
           sourceTimezone,
           userTimezone
         );
         const displayName = getDisplayNameForTimezone(userTimezone);
+
+        console.log("Converted time string:", convertedTimeStr); // Debug log
 
         // Update the displayed text
         item.textContent = `${courseInfo}, ${convertedTimeStr} ${displayName}`;
@@ -213,8 +239,10 @@ function convertTimezones() {
 Converted to: ${displayName} (${userTimezone})
 Note: Class days may shift due to timezone differences`;
       } catch (e) {
-        console.error("Time conversion error:", e);
+        console.error("Time conversion error for", courseInfo, ":", e);
       }
+    } else {
+      console.log("No original data found for:", courseInfo); // Debug log
     }
   });
 }
@@ -272,25 +300,50 @@ function storeOriginalTimes() {
 
   listItems.forEach((item) => {
     const text = item.textContent.trim();
-    // UPDATED REGEX: Specifically looks for "UTC" at the end.
-    const match = text.match(
-      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}:\d{2})(AM|PM)\s+(UTC)$/
+    console.log("Processing course text:", text); // Debug log
+
+    // Try UTC format first (new format) - with optional minutes
+    let match = text.match(
+      /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}):?(\d{2})?(AM|PM)\s+(UTC)$/i
     );
+
+    // If UTC format not found, try old city format (backward compatibility)
+    if (!match) {
+      match = text.match(
+        /^(.+?),\s*([A-Za-z,\s]+)@(\d{1,2}):?(\d{2})?(AM|PM)\s+([A-Za-z\s]+)$/i
+      );
+    }
 
     if (match) {
       const courseInfo = match[1].trim();
       const days = match[2].trim();
-      const time = `${match[3]}${match[4]}`;
-      const city = match[5].trim(); // This will be "UTC"
+      const hours = match[3];
+      const minutes = match[4] || "00"; // Default to 00 if no minutes
+      const ampm = match[5];
+      const time = `${hours}:${minutes}${ampm}`;
+      const city = match[6].trim();
+
+      console.log("Matched course:", { courseInfo, days, time, city }); // Debug log
+
+      // Determine source timezone based on format
+      let sourceTimezone;
+      if (city === "UTC") {
+        sourceTimezone = "UTC";
+      } else {
+        sourceTimezone = getTimezoneForCity(city);
+      }
 
       // Store original time info using course name as key
-      // UPDATED LOGIC: Source timezone is now always UTC.
       originalCourseTimes.set(courseInfo, {
         days: days,
         time: time,
-        city: city, // Storing "UTC" for tooltip consistency
-        timezone: "UTC", // Hardcode the source timezone
+        city: city,
+        timezone: sourceTimezone,
       });
+
+      console.log("Stored course data:", originalCourseTimes.get(courseInfo)); // Debug log
+    } else {
+      console.log("No match for text:", text); // Debug log
     }
   });
 }
