@@ -12,7 +12,7 @@ Converts Minerva Forum course times from UTC to your local timezone. Perfect for
 ### Key Features:
 ✅ **Automatic Timezone Detection** - Detects your local timezone automatically
 ✅ **Multiple Timezone Support** - Choose from SF, BA, Seoul, Taipei, Hyderabad, Berlin, Tokyo
-✅ **Real-time Conversion** - Times update instantly when you change timezones  
+✅ **Real-time Conversion** - Times update instantly when you change timezones
 ✅ **UTC & City Format Support** - Works with both old city-based times and new UTC format
 ✅ **Visual Integration** - Seamlessly integrates into the Minerva Forum interface
 ✅ **Hover Tooltips** - Shows original time and conversion details on hover
@@ -26,7 +26,7 @@ Converts Minerva Forum course times from UTC to your local timezone. Perfect for
 
 ### Supported Timezones:
 - San Francisco (America/Los_Angeles)
-- Buenos Aires (America/Argentina/Buenos_Aires)  
+- Buenos Aires (America/Argentina/Buenos_Aires)
 - Seoul (Asia/Seoul)
 - Taipei (Asia/Taipei)
 - Hyderabad (Asia/Kolkata)

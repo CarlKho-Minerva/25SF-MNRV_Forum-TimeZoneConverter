@@ -1,0 +1,35 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#4285f4" stroke="#fff" stroke-width="3"/>
+
+  <!-- Clock face -->
+  <circle cx="64" cy="64" r="45" fill="#fff" stroke="#4285f4" stroke-width="2"/>
+
+  <!-- Clock numbers -->
+  <g fill="#4285f4" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">
+    <text x="64" y="25" dominant-baseline="central">12</text>
+    <text x="95" y="69" dominant-baseline="central">3</text>
+    <text x="64" y="108" dominant-baseline="central">6</text>
+    <text x="33" y="69" dominant-baseline="central">9</text>
+  </g>
+
+  <!-- Clock hands -->
+  <g stroke="#4285f4" stroke-width="3" stroke-linecap="round">
+    <!-- Hour hand pointing to 2 -->
+    <line x1="64" y1="64" x2="78" y2="48"/>
+    <!-- Minute hand pointing to 6 -->
+    <line x1="64" y1="64" x2="64" y2="35"/>
+  </g>
+
+  <!-- Center dot -->
+  <circle cx="64" cy="64" r="3" fill="#4285f4"/>
+
+  <!-- Globe elements to represent timezone -->
+  <g stroke="#4285f4" stroke-width="1.5" fill="none" opacity="0.6">
+    <!-- Vertical line -->
+    <line x1="64" y1="25" x2="64" y2="103"/>
+    <!-- Horizontal lines -->
+    <ellipse cx="64" cy="64" rx="35" ry="15"/>
+    <ellipse cx="64" cy="64" rx="35" ry="25"/>
+  </g>
+</svg>

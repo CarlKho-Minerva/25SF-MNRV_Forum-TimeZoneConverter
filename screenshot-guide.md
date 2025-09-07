@@ -11,7 +11,7 @@
 - Show the timezone dropdown open with different options
 - Demonstrate the conversion happening
 
-### Screenshot 3: Tooltip Feature  
+### Screenshot 3: Tooltip Feature
 - Show a hover tooltip displaying conversion details
 - Capture the "Original Time" and "Converted to" information
 
@@ -23,7 +23,7 @@
 
 ## Optional: Promotional Images
 - Small tile: 440x280px
-- Large tile: 920x680px  
+- Large tile: 920x680px
 - Marquee: 1400x560px
 
 These are optional but help with discoverability in the Chrome Web Store.
