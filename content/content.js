@@ -139,57 +139,87 @@ function getTimezoneForCity(cityName) {
 
 function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
   const [days, time] = timeStr.split("@");
+  
+  // Fixed day mapping - use single letters for parsing
   const dayMap = {
     M: "Monday",
-    T: "Tuesday",
+    T: "Tuesday", 
     W: "Wednesday",
-    Th: "Thursday",
+    R: "Thursday", // Thursday is 'R' in academic scheduling
     F: "Friday",
-    Sa: "Saturday",
-    Su: "Sunday",
+    S: "Saturday",
+    U: "Sunday"
+  };
+  
+  // Reverse map for converting back to abbreviations
+  const dayAbbrevMap = {
+    "Monday": "M",
+    "Tuesday": "T",
+    "Wednesday": "W", 
+    "Thursday": "R",
+    "Friday": "F",
+    "Saturday": "S",
+    "Sunday": "U"
   };
 
-  // Use regex with lookbehind to correctly match "Th" as a single token
-  const daysArr = days.match(/(?:M|T(?!h)|Th|W|F|Sa|Su)/g) || [];
+  // Parse days string - handle both old format (MTh, WF) and single letters
+  let daysArr = [];
+  if (days.includes("Th")) {
+    // Handle "Th" as special case
+    daysArr = days.replace(/Th/g, "R").match(/[MTWRFSU]/g) || [];
+  } else {
+    // Split into individual characters
+    daysArr = days.match(/[MTWRFSU]/g) || [];
+  }
+  
+  console.log("Original days:", days, "Parsed as:", daysArr);
+  
   let results = [];
 
   daysArr.forEach((day) => {
-    const baseDate = moment().startOf("week");
     const dayFullName = dayMap[day];
+    if (!dayFullName) {
+      console.log("Unknown day abbreviation:", day);
+      return;
+    }
 
-    // Set time on the current day
-    let dateTime = moment
-      .tz(
-        baseDate.format("YYYY-MM-DD ") + time,
-        "YYYY-MM-DD hh:mmA",
-        fromTimezone
-      )
-      .day(dayFullName);
+    // Create a specific date for this day of the week
+    const baseDate = moment().startOf("week");
+    let dateTime = moment.tz(
+      baseDate.format("YYYY-MM-DD ") + time,
+      "YYYY-MM-DD h:mmA",
+      fromTimezone
+    ).day(dayFullName);
 
     // Convert to target timezone
     let converted = dateTime.clone().tz(toTimezone);
-
+    
     // Get the actual day in target timezone
     let targetDay = converted.format("dddd");
-
-    // Find the abbreviation by matching the full day name
-    let convertedDay = Object.entries(dayMap).find(
-      ([abbr, full]) => full === targetDay
-    )[0];
-
-    results.push(convertedDay);
+    let convertedDayAbbrev = dayAbbrevMap[targetDay];
+    
+    if (convertedDayAbbrev) {
+      results.push(convertedDayAbbrev);
+    }
+    
+    console.log(`${day} (${dayFullName}) -> ${convertedDayAbbrev} (${targetDay})`);
   });
 
+  // Convert time
   const convertedTime = moment
-    .tz(
-      moment().format("YYYY-MM-DD ") + time,
-      "YYYY-MM-DD hh:mmA",
-      fromTimezone
-    )
+    .tz(moment().format("YYYY-MM-DD ") + time, "YYYY-MM-DD h:mmA", fromTimezone)
     .tz(toTimezone)
     .format("h:mmA");
 
-  return results.join("") + "@" + convertedTime;
+  // Remove duplicates and sort days in standard order
+  const uniqueDays = [...new Set(results)];
+  const dayOrder = ["M", "T", "W", "R", "F", "S", "U"];
+  const sortedDays = dayOrder.filter(day => uniqueDays.includes(day)).join("");
+  
+  const result = sortedDays + "@" + convertedTime;
+  console.log("Final conversion result:", result);
+  
+  return result;
 }
 
 function convertTimezones() {
