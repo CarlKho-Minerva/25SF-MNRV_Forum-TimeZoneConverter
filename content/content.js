@@ -139,41 +139,66 @@ function getTimezoneForCity(cityName) {
 
 function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
   const [days, time] = timeStr.split("@");
-  
-  // Fixed day mapping - use single letters for parsing
+
+  // Handle special case: "R" means irregular/rotating schedule - don't convert days
+  if (days === "R") {
+    const convertedTime = moment
+      .tz(moment().format("YYYY-MM-DD ") + time, "YYYY-MM-DD h:mmA", fromTimezone)
+      .tz(toTimezone)
+      .format("h:mmA");
+
+    console.log(`Irregular schedule - only converting time: ${time} -> ${convertedTime}`);
+    return `R@${convertedTime}`;
+  }
+
+  // Simple day mapping for regular schedules
   const dayMap = {
     M: "Monday",
-    T: "Tuesday", 
+    T: "Tuesday",
     W: "Wednesday",
-    R: "Thursday", // Thursday is 'R' in academic scheduling
+    Th: "Thursday",
     F: "Friday",
     S: "Saturday",
-    U: "Sunday"
+    Su: "Sunday"
   };
-  
+
   // Reverse map for converting back to abbreviations
   const dayAbbrevMap = {
     "Monday": "M",
     "Tuesday": "T",
-    "Wednesday": "W", 
-    "Thursday": "R",
+    "Wednesday": "W",
+    "Thursday": "Th",
     "Friday": "F",
     "Saturday": "S",
-    "Sunday": "U"
+    "Sunday": "Su"
   };
 
-  // Parse days string - handle both old format (MTh, WF) and single letters
+  // Parse days string properly - handle multi-character days first
   let daysArr = [];
-  if (days.includes("Th")) {
-    // Handle "Th" as special case
-    daysArr = days.replace(/Th/g, "R").match(/[MTWRFSU]/g) || [];
-  } else {
-    // Split into individual characters
-    daysArr = days.match(/[MTWRFSU]/g) || [];
+  let remainingDays = days;
+
+  // Handle "TTH" specifically (Tuesday/Thursday)
+  if (remainingDays.includes("TTH")) {
+    daysArr.push("T", "Th");
+    remainingDays = remainingDays.replace(/TTH/g, "");
   }
-  
+  // Handle "Th" (Thursday)
+  else if (remainingDays.includes("Th")) {
+    daysArr.push("Th");
+    remainingDays = remainingDays.replace(/Th/g, "");
+  }
+  // Handle "Su" (Sunday)
+  else if (remainingDays.includes("Su")) {
+    daysArr.push("Su");
+    remainingDays = remainingDays.replace(/Su/g, "");
+  }
+
+  // Then extract remaining individual day letters
+  const individualDays = remainingDays.match(/[MTWFS]/g) || [];
+  daysArr = daysArr.concat(individualDays);
+
   console.log("Original days:", days, "Parsed as:", daysArr);
-  
+
   let results = [];
 
   daysArr.forEach((day) => {
@@ -193,15 +218,15 @@ function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
 
     // Convert to target timezone
     let converted = dateTime.clone().tz(toTimezone);
-    
+
     // Get the actual day in target timezone
     let targetDay = converted.format("dddd");
     let convertedDayAbbrev = dayAbbrevMap[targetDay];
-    
+
     if (convertedDayAbbrev) {
       results.push(convertedDayAbbrev);
     }
-    
+
     console.log(`${day} (${dayFullName}) -> ${convertedDayAbbrev} (${targetDay})`);
   });
 
@@ -211,14 +236,14 @@ function convertTimeToTargetTimezone(timeStr, fromTimezone, toTimezone) {
     .tz(toTimezone)
     .format("h:mmA");
 
-  // Remove duplicates and sort days in standard order
+  // Remove duplicates and sort days in standard order (keep Th as Th, not R)
   const uniqueDays = [...new Set(results)];
-  const dayOrder = ["M", "T", "W", "R", "F", "S", "U"];
+  const dayOrder = ["M", "T", "W", "Th", "F", "S", "Su"];
   const sortedDays = dayOrder.filter(day => uniqueDays.includes(day)).join("");
-  
+
   const result = sortedDays + "@" + convertedTime;
   console.log("Final conversion result:", result);
-  
+
   return result;
 }
 
